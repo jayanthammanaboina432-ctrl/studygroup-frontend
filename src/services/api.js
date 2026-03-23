@@ -1,15 +1,16 @@
-const API_BASE = "https://studygroup-backend.onrender.com";
+const API_BASE = "https://studygroup-backend-production-72ed.up.railway.app";
 
 // Register API
 export const registerUser = async (user) => {
   const response = await fetch(`${API_BASE}/auth/register`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(user)
   });
-
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(error);
+  }
   return response.json();
 };
 
@@ -17,12 +18,13 @@ export const registerUser = async (user) => {
 export const loginUser = async (user) => {
   const response = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(user)
   });
-
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(error);
+  }
   return response.json();
 };
 
@@ -36,12 +38,9 @@ export const getGroups = async () => {
 export const createGroup = async (group) => {
   const response = await fetch(`${API_BASE}/groups/create`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(group)
   });
-
   return response.json();
 };
 
@@ -49,12 +48,27 @@ export const createGroup = async (group) => {
 export const joinGroup = async (data) => {
   const response = await fetch(`${API_BASE}/groups/join`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
   });
+  return response.json();
+};
 
+// Delete Group
+export const deleteGroup = async (groupId) => {
+  const response = await fetch(`${API_BASE}/groups/${groupId}`, {
+    method: "DELETE",
+  });
+  return response;
+};
+
+// Update Group
+export const updateGroup = async (groupId, group) => {
+  const response = await fetch(`${API_BASE}/groups/${groupId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(group)
+  });
   return response.json();
 };
 
@@ -62,12 +76,9 @@ export const joinGroup = async (data) => {
 export const sendMessage = async (data) => {
   const response = await fetch(`${API_BASE}/messages/send`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
   });
-
   return response.json();
 };
 

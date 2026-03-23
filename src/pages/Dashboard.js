@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getGroups, joinGroup } from "../services/api";
+import { getGroups, joinGroup, deleteGroup } from "../services/api";
 import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
@@ -102,22 +102,30 @@ function Dashboard() {
     setGroups([...groups]);
   };
 
-  const handleDeleteGroup = (groupId) => {
+  // Delete group from backend + localStorage
+  const handleDeleteGroup = async (groupId) => {
     const confirmed = window.confirm("Are you sure you want to delete this group? This cannot be undone.");
     if (!confirmed) return;
 
-    localStorage.removeItem(`group_members_${groupId}`);
-    localStorage.removeItem(`group_requests_${groupId}`);
-    localStorage.removeItem(`chat_group_${groupId}`);
-    localStorage.removeItem(`online_group_${groupId}`);
+    try {
+      await deleteGroup(groupId);
 
-    const createdGroups = JSON.parse(localStorage.getItem("createdGroups") || "[]");
-    localStorage.setItem("createdGroups", JSON.stringify(
-      createdGroups.filter((g) => String(g.id) !== String(groupId))
-    ));
+      localStorage.removeItem(`group_members_${groupId}`);
+      localStorage.removeItem(`group_requests_${groupId}`);
+      localStorage.removeItem(`chat_group_${groupId}`);
+      localStorage.removeItem(`online_group_${groupId}`);
 
-    setGroups(groups.filter((g) => String(g.id) !== String(groupId)));
-    alert("Group deleted successfully!");
+      const createdGroups = JSON.parse(localStorage.getItem("createdGroups") || "[]");
+      localStorage.setItem("createdGroups", JSON.stringify(
+        createdGroups.filter((g) => String(g.id) !== String(groupId))
+      ));
+
+      setGroups(groups.filter((g) => String(g.id) !== String(groupId)));
+      alert("Group deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting group:", error);
+      alert("Error deleting group");
+    }
   };
 
   const handleSaveEdit = (groupId) => {
@@ -225,7 +233,6 @@ function Dashboard() {
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           {filteredGroups.map((group) => {
             const alreadyJoined = joinedIds.find((g) => g.id === group.id);
-           
             const memberCount = getMemberCount(group.id);
             const pendingRequests = getPendingRequests(group.id);
             const isEditing = editingGroup === group.id;
@@ -303,8 +310,8 @@ function Dashboard() {
                         {/* Member count */}
                         <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "4px" }}>
                           👥 <strong style={{ color: "var(--text)" }}>{memberCount}</strong> member{memberCount !== 1 ? "s" : ""}
-                          {group.createdBy && (
-                            <span style={{ marginLeft: "10px" }}>· Created by <strong>{group.createdBy}</strong></span>
+                          {group.createdByName && (
+                            <span style={{ marginLeft: "10px" }}>· Created by <strong>{group.createdByName}</strong></span>
                           )}
                         </div>
                       </div>
@@ -312,7 +319,6 @@ function Dashboard() {
                       {/* Action buttons */}
                       <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginLeft: "16px", flexShrink: 0 }}>
 
-                        {/* Join / Open / Request button */}
                         <button
                           onClick={() => handleJoin(group)}
                           style={{
@@ -324,7 +330,6 @@ function Dashboard() {
                           {alreadyJoined ? "Open Chat" : pending ? "⏳ Pending" : group.isPrivate ? "Request to Join" : "Join Group"}
                         </button>
 
-                        {/* Edit + Delete buttons */}
                         <div style={{ display: "flex", gap: "6px" }}>
                           <button
                             onClick={() => { setEditingGroup(group.id); setEditForm({ groupName: group.groupName, subject: group.subject, description: group.description }); }}

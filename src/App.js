@@ -7,11 +7,11 @@ import Dashboard from "./pages/Dashboard";
 import CreateGroup from "./pages/CreateGroup";
 import Chat from "./pages/Chat";
 import GroupDetail from "./pages/GroupDetail";
-import Profile from "./pages/Profile";       // ← add this
+import Profile from "./pages/Profile";
 
 function App() {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div>
         <h1 style={{textAlign:"center"}}>Study Group Finder</h1>
 
@@ -20,7 +20,7 @@ function App() {
           <Link to="/login">Login</Link> |{" "}
           <Link to="/dashboard">Groups</Link> |{" "}
           <Link to="/create-group">Create Group</Link> |{" "}
-          <Link to="/profile">Profile</Link> |{" "}   
+          <Link to="/profile">Profile</Link> |{" "}
           <Link to="/chat">Chat</Link>
         </nav>
 
@@ -32,7 +32,7 @@ function App() {
           <Route path="/create-group" element={<CreateGroup />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/group/:groupId" element={<GroupDetail />} />
-          <Route path="/profile" element={<Profile />} />    {/* ← add this */}
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </div>
     </Router>
