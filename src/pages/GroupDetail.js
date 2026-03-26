@@ -93,14 +93,7 @@ function GroupDetail() {
   useEffect(() => {
     if (!joined || !username) return;
 
-<<<<<<< HEAD
-    // ✅ SockJS requires http/https — NOT ws/wss
-    const socketUrl = API_BASE || window.location.origin;
-    const socket = new SockJS(`${socketUrl}/ws`);
-
-=======
     const socket = new SockJS(`${WS_BASE}/ws`);
->>>>>>> aae7dce30c4c78f420bea0a9fbb0a1479e025777
     const client = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,
