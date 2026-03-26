@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: studygroup-frontend
+    env: docker
+    plan: free
+    repo: # Add your GitHub repo URL here
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://studygroup-backend-hgvm.onrender.com
+        scope: build
+      - key: CI
+        value: "false"
+        scope: build

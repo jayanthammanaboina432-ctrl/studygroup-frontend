@@ -5,7 +5,16 @@ import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
 const EMOJIS = ["😀","😂","😍","🥰","😎","🤔","😢","😡","👍","👎","❤️","🔥","🎉","✅","💡","📚","🚀","💪","🙏","👋","😅","🤣","😊","😇","🥳","😴","🤯","😱","🤗","💯"];
-const API_BASE = "http://localhost:8080";
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
+
+// Convert http/https to ws/wss for WebSocket
+const getWebSocketUrl = () => {
+  if (API_BASE.startsWith("https://")) {
+    return API_BASE.replace("https://", "wss://");
+  }
+  return API_BASE.replace("http://", "ws://");
+};
+const WS_BASE = getWebSocketUrl();
 
 function GroupDetail() {
   const { groupId } = useParams();
@@ -78,7 +87,7 @@ function GroupDetail() {
   useEffect(() => {
     if (!joined || !username) return;
 
-    const socket = new SockJS(`${API_BASE}/ws`);
+    const socket = new SockJS(`${WS_BASE}/ws`);
     const client = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,
