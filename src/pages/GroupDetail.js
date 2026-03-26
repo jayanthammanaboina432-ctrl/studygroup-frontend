@@ -6,15 +6,6 @@ import { Client } from "@stomp/stompjs";
 
 const EMOJIS = ["😀","😂","😍","🥰","😎","🤔","😢","😡","👍","👎","❤️","🔥","🎉","✅","💡","📚","🚀","💪","🙏","👋","😅","🤣","😊","😇","🥳","😴","🤯","😱","🤗","💯"];
 
-// Convert http/https to ws/wss for WebSocket
-const getWebSocketUrl = (apiBase) => {
-  if (apiBase.startsWith("https://")) {
-    return apiBase.replace("https://", "wss://");
-  }
-  return apiBase.replace("http://", "ws://");
-};
-const WS_BASE = getWebSocketUrl(API_BASE);
-
 function GroupDetail() {
   const { groupId } = useParams();
   const navigate = useNavigate();
@@ -93,7 +84,8 @@ function GroupDetail() {
   useEffect(() => {
     if (!joined || !username) return;
 
-    const socket = new SockJS(`${WS_BASE}/ws`);
+    // SockJS requires http(s):// URLs and automatically upgrades to WebSocket
+    const socket = new SockJS(`${API_BASE}/ws`);
     const client = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,
