@@ -1,20 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
-import { getGroups } from "../services/api";
+import { getGroups, API_BASE } from "../services/api";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
 const EMOJIS = ["😀","😂","😍","🥰","😎","🤔","😢","😡","👍","👎","❤️","🔥","🎉","✅","💡","📚","🚀","💪","🙏","👋","😅","🤣","😊","😇","🥳","😴","🤯","😱","🤗","💯"];
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
-
-// Convert http/https to ws/wss for WebSocket
-const getWebSocketUrl = () => {
-  if (API_BASE.startsWith("https://")) {
-    return API_BASE.replace("https://", "wss://");
-  }
-  return API_BASE.replace("http://", "ws://");
-};
-const WS_BASE = getWebSocketUrl();
 
 function GroupDetail() {
   const { groupId } = useParams();
@@ -33,6 +23,7 @@ function GroupDetail() {
   const [isTabFocused, setIsTabFocused] = useState(true);
   const [lightboxImg, setLightboxImg] = useState(null);
   const [connected, setConnected] = useState(false);
+  const [loadError, setLoadError] = useState(false); // ✅ NEW: catches white screen
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -53,7 +44,11 @@ function GroupDetail() {
         const data = await getGroups();
         const group = data.find((g) => String(g.id) === String(groupId));
         if (group) { setGroupName(group.groupName); setSubject(group.subject); }
-      } catch (error) { console.error("Error fetching group:", error); }
+        else { setGroupName(`Group #${groupId}`); }
+      } catch (error) {
+        console.error("Error fetching group:", error);
+        setLoadError(true);
+      }
     };
     fetchGroup();
   }, [groupId]);
@@ -62,6 +57,7 @@ function GroupDetail() {
     const loadMessages = async () => {
       try {
         const response = await fetch(`${API_BASE}/messages/group/${groupId}`);
+        if (!response.ok) throw new Error("Failed to load messages");
         const data = await response.json();
         const formatted = data.map((m) => ({
           id: m.id,
@@ -75,6 +71,7 @@ function GroupDetail() {
         setMessages(formatted);
       } catch (error) {
         console.error("Error loading messages:", error);
+        setLoadError(true);
       }
     };
     loadMessages();
@@ -87,7 +84,10 @@ function GroupDetail() {
   useEffect(() => {
     if (!joined || !username) return;
 
-    const socket = new SockJS(`${WS_BASE}/ws`);
+    // ✅ SockJS requires http/https — NOT ws/wss
+    const socketUrl = API_BASE || window.location.origin;
+    const socket = new SockJS(`${socketUrl}/ws`);
+
     const client = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,
@@ -112,6 +112,10 @@ function GroupDetail() {
         });
       },
       onDisconnect: () => setConnected(false),
+      onStompError: (frame) => {
+        console.error("STOMP error:", frame);
+        setConnected(false);
+      },
     });
 
     client.activate();
@@ -147,6 +151,7 @@ function GroupDetail() {
     setUsername(nameInput.trim());
     setJoined(true);
     setUnreadCount(0);
+    setLoadError(false);
   };
 
   const handleExit = () => {
@@ -250,13 +255,37 @@ function GroupDetail() {
     </a>
   );
 
+  // ✅ Error screen — replaces white screen
+  if (loadError && !joined) {
+    return (
+      <div className="container" style={{ textAlign: "center", padding: "40px" }}>
+        <div style={{ fontSize: "3rem", marginBottom: "16px" }}>⚠️</div>
+        <h2 style={{ color: "var(--text)", marginBottom: "8px" }}>Unable to connect</h2>
+        <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "24px" }}>
+          Could not reach the server. Please check your connection or try again.
+        </p>
+        <button onClick={() => { setLoadError(false); window.location.reload(); }}>
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   if (!joined) {
     return (
       <div className="container">
         <h2>Join — {groupName || `Group #${groupId}`}</h2>
         <p style={{ color: "var(--text-muted)", marginBottom: "20px", fontSize: "0.9rem" }}>Enter your name to enter the group chat</p>
-        <input type="text" placeholder="Your name" value={nameInput} onChange={(e) => setNameInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleJoinChat()} />
-        <button type="button" onClick={handleJoinChat} style={{ marginTop: "14px" }}>Enter Chat</button>
+        <input
+          type="text"
+          placeholder="Your name"
+          value={nameInput}
+          onChange={(e) => setNameInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleJoinChat()}
+        />
+        <button type="button" onClick={handleJoinChat} style={{ marginTop: "14px" }}>
+          Enter Chat
+        </button>
       </div>
     );
   }
@@ -408,9 +437,10 @@ function GroupDetail() {
       {/* Lightbox */}
       {lightboxImg && (
         <div onClick={() => setLightboxImg(null)}
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, cursor: "zoom-out", animation: "slideUp 0.2s ease" }}>
-          <img src={lightboxImg} alt="preview" style={{ maxWidth: "90vw", maxHeight: "90vh", borderRadius: "12px", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }} />
-          <div style={{ position: "absolute", top: "20px", right: "24px", color: "#fff", fontSize: "1.5rem", cursor: "pointer", opacity: 0.7 }}>✕</div>
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, cursor: "zoom-out", animation: "fadeIn 0.2s ease" }}>
+          <img src={lightboxImg} alt="Full size" style={{ maxWidth: "90vw", maxHeight: "90vh", borderRadius: "12px", boxShadow: "0 8px 48px rgba(0,0,0,0.5)" }} />
+          <button onClick={() => setLightboxImg(null)}
+            style={{ position: "absolute", top: "20px", right: "24px", background: "rgba(255,255,255,0.15)", border: "none", borderRadius: "50%", width: "36px", height: "36px", color: "#fff", fontSize: "1.1rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
         </div>
       )}
     </div>

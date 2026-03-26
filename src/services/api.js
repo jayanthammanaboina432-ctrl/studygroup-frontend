@@ -1,10 +1,12 @@
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+// ✅ Automatically uses https in production, http in local dev
+export const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
+
 // Register API
 export const registerUser = async (user) => {
   const response = await fetch(`${API_BASE}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(user)
+    body: JSON.stringify(user),
   });
   if (!response.ok) {
     const error = await response.text();
@@ -18,7 +20,7 @@ export const loginUser = async (user) => {
   const response = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(user)
+    body: JSON.stringify(user),
   });
   if (!response.ok) {
     const error = await response.text();
@@ -38,7 +40,7 @@ export const createGroup = async (group) => {
   const response = await fetch(`${API_BASE}/groups/create`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(group)
+    body: JSON.stringify(group),
   });
   return response.json();
 };
@@ -48,7 +50,7 @@ export const joinGroup = async (data) => {
   const response = await fetch(`${API_BASE}/groups/join`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
   return response.json();
 };
@@ -66,7 +68,7 @@ export const updateGroup = async (groupId, group) => {
   const response = await fetch(`${API_BASE}/groups/${groupId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(group)
+    body: JSON.stringify(group),
   });
   return response.json();
 };
@@ -76,7 +78,7 @@ export const sendMessage = async (data) => {
   const response = await fetch(`${API_BASE}/messages/send`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
   return response.json();
 };
