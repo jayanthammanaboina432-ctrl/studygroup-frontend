@@ -5,11 +5,15 @@ import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
 const EMOJIS = ["😀","😂","😍","🥰","😎","🤔","😢","😡","👍","👎","❤️","🔥","🎉","✅","💡","📚","🚀","💪","🙏","👋","😅","🤣","😊","😇","🥳","😴","🤯","😱","🤗","💯"];
-<<<<<<< HEAD
-=======
-const API_BASE = "https://studygroup-backend-hgvm.onrender.com";
-const WS_BASE = API_BASE.replace(/^https/, "wss").replace(/^http/, "ws");
->>>>>>> aae7dce30c4c78f420bea0a9fbb0a1479e025777
+
+// Convert http/https to ws/wss for WebSocket
+const getWebSocketUrl = (apiBase) => {
+  if (apiBase.startsWith("https://")) {
+    return apiBase.replace("https://", "wss://");
+  }
+  return apiBase.replace("http://", "ws://");
+};
+const WS_BASE = getWebSocketUrl(API_BASE);
 
 function GroupDetail() {
   const { groupId } = useParams();
