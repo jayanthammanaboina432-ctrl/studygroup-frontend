@@ -6,7 +6,6 @@ import { Client } from "@stomp/stompjs";
 
 const EMOJIS = ["😀","😂","😍","🥰","😎","🤔","😢","😡","👍","👎","❤️","🔥","🎉","✅","💡","📚","🚀","💪","🙏","👋","😅","🤣","😊","😇","🥳","😴","🤯","😱","🤗","💯"];
 const API_BASE = "https://studygroup-backend-hgvm.onrender.com";
-const WS_BASE = API_BASE.replace(/^https/, "wss").replace(/^http/, "ws");
 
 function GroupDetail() {
   const { groupId } = useParams();
@@ -79,7 +78,7 @@ function GroupDetail() {
   useEffect(() => {
     if (!joined || !username) return;
 
-    const socket = new SockJS(`${WS_BASE}/ws`);
+    const socket = new SockJS(`${API_BASE}/ws`);
     const client = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,
