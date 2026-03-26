@@ -83,11 +83,6 @@ function GroupDetail() {
 
   useEffect(() => {
     if (!joined || !username) return;
-
-<<<<<<< HEAD
-=======
-    // SockJS requires http(s):// URLs and automatically upgrades to WebSocket
->>>>>>> c6e42da7a73a637813f70a808a13ffb7149c63d4
     const socket = new SockJS(`${API_BASE}/ws`);
     const client = new Client({
       webSocketFactory: () => socket,
