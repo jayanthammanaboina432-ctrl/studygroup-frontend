@@ -5,6 +5,11 @@ import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
 const EMOJIS = ["😀","😂","😍","🥰","😎","🤔","😢","😡","👍","👎","❤️","🔥","🎉","✅","💡","📚","🚀","💪","🙏","👋","😅","🤣","😊","😇","🥳","😴","🤯","😱","🤗","💯"];
+<<<<<<< HEAD
+=======
+const API_BASE = "https://studygroup-backend-hgvm.onrender.com";
+const WS_BASE = API_BASE.replace(/^https/, "wss").replace(/^http/, "ws");
+>>>>>>> aae7dce30c4c78f420bea0a9fbb0a1479e025777
 
 function GroupDetail() {
   const { groupId } = useParams();
@@ -84,10 +89,14 @@ function GroupDetail() {
   useEffect(() => {
     if (!joined || !username) return;
 
+<<<<<<< HEAD
     // ✅ SockJS requires http/https — NOT ws/wss
     const socketUrl = API_BASE || window.location.origin;
     const socket = new SockJS(`${socketUrl}/ws`);
 
+=======
+    const socket = new SockJS(`${WS_BASE}/ws`);
+>>>>>>> aae7dce30c4c78f420bea0a9fbb0a1479e025777
     const client = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,

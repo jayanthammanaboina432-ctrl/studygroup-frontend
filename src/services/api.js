@@ -1,6 +1,11 @@
+<<<<<<< HEAD
 // ✅ Automatically uses https in production, http in local dev
 export const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
+=======
+//const API_BASE = "https://studygroup-backend-production-72ed.up.railway.app";
+const API_BASE='https://studygroup-backend-hgvm.onrender.com'
+>>>>>>> aae7dce30c4c78f420bea0a9fbb0a1479e025777
 // Register API
 export const registerUser = async (user) => {
   const response = await fetch(`${API_BASE}/auth/register`, {
